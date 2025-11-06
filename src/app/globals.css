@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: only light;
+}
+
+body {
+  @apply bg-slate-50;
+}
+
+main {
+  @apply flex min-h-screen flex-col;
+}
+
+input, textarea, select {
+  @apply rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100;
+}
+
+button {
+  @apply rounded-xl;
+}
