@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  AFILIADO
+}
+
+enum InvitationStatus {
+  DISPONIBLE
+  ASIGNADO
+  USADO
+  VENCIDO
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDIENTE
+  APROBADO
+  ENTREGADO
+  CANCELADO
+}
+
+model User {
+  id           String            @id @default(cuid())
+  email        String            @unique
+  passwordHash String
+  role         Role              @default(AFILIADO)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  affiliate    AffiliateProfile?
+}
+
+model AffiliateProfile {
+  id           String          @id @default(cuid())
+  userId       String          @unique
+  user         User            @relation(fields: [userId], references: [id])
+  displayName  String
+  photoUrl     String?
+  location     String?
+  serviceType  String?
+  whatsapp     String?
+  emailPublic  String?
+  socialLinks  SocialLink[]
+  inventory    EventInvitation[]
+  orders       Order[]
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model SocialLink {
+  id          String           @id @default(cuid())
+  affiliate   AffiliateProfile @relation(fields: [affiliateId], references: [id])
+  affiliateId String
+  platform    String
+  url         String
+}
+
+model EventInvitation {
+  id             String            @id @default(cuid())
+  code           String            @unique
+  status         InvitationStatus  @default(DISPONIBLE)
+  expiresAt      DateTime?
+  affiliate      AffiliateProfile? @relation(fields: [affiliateId], references: [id])
+  affiliateId    String?
+  usedByOrder    Order?            @relation(fields: [usedByOrderId], references: [id])
+  usedByOrderId  String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model Order {
+  id                String            @id @default(cuid())
+  affiliate         AffiliateProfile  @relation(fields: [affiliateId], references: [id])
+  affiliateId       String
+  status            OrderStatus       @default(DRAFT)
+  customerName      String
+  customerPhone     String?
+  customerEmail     String?
+  notes             String?
+  eventInvitation   EventInvitation?  @relation(fields: [eventInvitationId], references: [id])
+  eventInvitationId String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model Resource {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

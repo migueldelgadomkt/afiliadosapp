@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: afiliados
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  app:
+    build: .
+    command: pnpm dev
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/afiliados
+      NEXTAUTH_SECRET: change-me
+      NEXTAUTH_URL: http://localhost:3000
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM: ${RESEND_FROM:-Invitado <no-reply@invitado.mx>}
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+volumes:
+  db-data:
